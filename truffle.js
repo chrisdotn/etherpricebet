@@ -1,8 +1,6 @@
 module.exports = {
   build: {
     "index.html": "index.html",
-    "index_2.html": "index_2.html",
-    "interaction.html": "interaction.html",
     "app.js": [
       "javascripts/app.js"
     ],
