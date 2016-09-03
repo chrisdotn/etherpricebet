@@ -1,0 +1,130 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="HandheldFriendly" content="True">
+
+    <title>Ether Price Bet</title>
+
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
+    <link rel="stylesheet" type="text/css" media="screen" href="concise.min.css" />
+    <link rel="stylesheet" type="text/css" media="screen" href="masthead.css" />
+    <link rel="stylesheet" type="text/css" media="screen" href="dev.css" />
+
+    <script src="./app.js"></script>
+</head>
+
+<body>
+    <header container class="siteHeader">
+        <div row>
+            <h1 column="4" class="logo">Ether Price Bet</h1>
+
+            <nav column="8" class="nav">
+                <ul>
+                    <li><a href="">Home</a></li>
+                    <li><a href="">About</a></li>
+                    <li><a href="">Contact</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <div class="masthead">
+        <div container>
+            <div row>
+                <div column="12">
+                    <h3 class="masthead-title">Contract Status</h3>
+                </div>
+            </div>
+            <div row>
+                <div column="4">
+                    <p>There are <strong><span id="balance">_VALUE_</span> ether</strong> in the contract.</p>
+                </div>
+                <div column="4">
+                    <p>The contract's status is <strong><span id="state">_STATE_</span></strong>.</p>
+                </div>
+                <div column="4">
+                    <p>The bet is on <strong><span id="pricelevel">_PRICE_</span></strong> $ per ether.</p>
+                </div>
+            </div>
+            <div row>
+                <div class="hidden" id="status_message" column="12">
+                    <div class="alert" id="alert_box">
+                        <!-- <a onclick="hideMessage()" class="alert-close">&times;</a> -->
+                        <i class="material-icons alert-close" onclick="hideMessage()">close</i>
+                        <p><i class="material-icons" id="status_icon">info_outline</i>
+                            <span id="message_content">_MESSAGE_</span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <main container class="siteContent">
+        <div row>
+            <div column="3">
+                <h3>New Bet</h3>
+
+                <p>
+                    <label for="dollar_value">Dollar value:</label>
+                    <input type="number" min="0" id="dollar_value" inputmode="numeric" placeholder="e.g. 100" />
+                </p>
+
+                <p>
+                    <label for="end_betting_date">Betting open until:</label>
+                    <input type="date" id="end_betting_date" />
+                </p>
+
+                <p>
+                    <label for="prize">Prize Amount in Ether:</label>
+                    <input type="number" min="0" id="prize_amount" inputmode="numberic" placeholder="e.g. 10" />
+                </p>
+
+                <p>
+                    <button class="button--sm" id="create_new_bet" onclick="createBet()">Create New Bet</button>
+                </p>
+            </div>
+
+            <div column="3">
+                <h3>Place Bet</h3>
+
+                <p>
+                    <label for="bet_date">Bet date:</label>
+                    <input type="date" id="bet_date" />
+                </p>
+
+                <p>
+                    <button class="button--sm" id="place_bet" onclick="placeBet()">Place Bet</button>
+                </p>
+            </div>
+
+            <div column="3">
+                <h3>Close Betting</h3>
+
+                <p>Close the betting period.</p>
+
+                <button class="button--sm" id="close_betting" onclick="closeBetting()">Close Betting</button>
+            </div>
+
+            <div column="3">
+                <h3>Pay</h3>
+
+                <p>Determine the winner and initiate the payout.</p>
+
+                <button class="button--sm" id="pay" onclick="payPrize()">Pay Prize</button>
+            </div>
+        </div>
+        </div>
+
+    </main>
+
+    <footer container class="siteFooter">
+        <p>Copyright &copy; 2016 by chrisdotn</p>
+    </footer>
+</body>
+
+</html>
