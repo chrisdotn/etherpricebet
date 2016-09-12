@@ -15,7 +15,4 @@ config/development/*.sol.js
 config/test/contracts.json
 build
 dist
-
-# Generated contracts
-environments/*/contracts/**
-
+environments/**

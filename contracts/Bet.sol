@@ -54,7 +54,7 @@ contract Bet is Mortal {
         bets[msg.sender] = date;
     }
 
-    function payout(address winner) {
+    function payout(address winner) returns (bool) {
         if (bets[winner] == 0) {
             throw;
         }
@@ -62,6 +62,16 @@ contract Bet is Mortal {
         pricelevel = 0;
         enddate = 0;
         state = State.Ended;
-        winner.send(this.balance);
+
+        // send money to winner
+        //uint amount = this.balance;
+        //this.balance = 0;
+
+        if (winner.send(this.balance)) {
+            return true;
+        } else {
+            //this.balance = amount;
+            return false;
+        }
     }
 }
