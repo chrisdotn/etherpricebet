@@ -23,9 +23,15 @@ var AlertType = {
 function refreshDashboard() {
   var bet = Bet.deployed();
 
-  var ether_value = web3.fromWei(web3.eth.getBalance(bet.address), 'ether');
-  var htmlElement = document.getElementById('balance');
-  htmlElement.innerHTML = ether_value;
+  web3.eth.getBalance(bet.address, function(error, result) {
+      if (!error) {
+          var ether_value = web3.fromWei(result, 'ether');
+          var htmlElement = document.getElementById('balance');
+          htmlElement.innerHTML = ether_value;
+      } else {
+          console.error(error);
+      }
+  });
 
   bet.state().then(function(value) {
       var htmlElement = document.getElementById('state');
@@ -275,6 +281,7 @@ window.onload = function() {
         case 'index.html':
             // fallthrough to default
         default:
+            console.log("Choosing default");
             refreshDashboard();
             updateButtons();
     }
