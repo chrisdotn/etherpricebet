@@ -23,15 +23,25 @@ var AlertType = {
 function refreshDashboard() {
   var bet = Bet.deployed();
 
-  web3.eth.getBalance(bet.address, function(error, result) {
-      if (!error) {
-          var ether_value = web3.fromWei(result, 'ether');
-          var htmlElement = document.getElementById('balance');
-          htmlElement.innerHTML = ether_value;
-      } else {
-          console.error(error);
-      }
-  });
+  // web3.eth.getBalance(bet.address, function(error, result) {
+  //     if (!error) {
+  //         console.log('Ether value in contract: ' + ether_value);
+  //         var ether_value = web3.fromWei(result, 'ether');
+  //         var htmlElement = document.getElementById('balance');
+  //         htmlElement.innerHTML = ether_value;
+  //     } else {
+  //         console.error(error);
+  //     }
+  // });
+
+  bet.getBalance().then(function (balance) {
+      var ether_value = web3.fromWei(balance, 'ether');
+      console.log('Ether value in contract: ' + ether_value);
+      var htmlElement = document.getElementById('balance');
+      htmlElement.innerHTML = ether_value;
+  }).catch(function (e) {
+      console.error(e);
+  })
 
   bet.state().then(function(value) {
       var htmlElement = document.getElementById('state');

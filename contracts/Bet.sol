@@ -13,6 +13,10 @@ contract Bet is Mortal {
         pricelevel = 0;
     }
 
+    function getBalance() constant returns (uint balance) {
+        return this.balance;
+    }
+
     function setPriceLevel(uint level) {
         pricelevel = level;
     }
