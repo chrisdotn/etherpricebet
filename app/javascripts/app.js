@@ -6,10 +6,18 @@ var StatusEnum = {
     CLOSED: 2,
     ENDED: 3,
     properties: {
-        0: {name: 'new'},
-        1: {name: 'open'},
-        2: {name: 'closed'},
-        3: {name: 'ended'}
+        0: {
+            name: 'new'
+        },
+        1: {
+            name: 'open'
+        },
+        2: {
+            name: 'closed'
+        },
+        3: {
+            name: 'ended'
+        }
     }
 };
 
@@ -20,56 +28,45 @@ var AlertType = {
     ERROR: 3
 };
 
+function updateHtmlValue(id, value) {
+    var htmlElement = document.getElementById(id);
+    htmlElement.innerHTML = value;
+}
+
 function refreshDashboard() {
-  var bet = Bet.deployed();
+    var bet = Bet.deployed();
 
-  // web3.eth.getBalance(bet.address, function(error, result) {
-  //     if (!error) {
-  //         console.log('Ether value in contract: ' + ether_value);
-  //         var ether_value = web3.fromWei(result, 'ether');
-  //         var htmlElement = document.getElementById('balance');
-  //         htmlElement.innerHTML = ether_value;
-  //     } else {
-  //         console.error(error);
-  //     }
-  // });
+    bet.getBalance().then(function(balance) {
+        updateHtmlValue('balance', web3.fromWei(balance, 'ether'));
+    }).catch(function(e) {
+        console.error(e);
+    })
 
-  bet.getBalance().then(function (balance) {
-      var ether_value = web3.fromWei(balance, 'ether');
-      console.log('Ether value in contract: ' + ether_value);
-      var htmlElement = document.getElementById('balance');
-      htmlElement.innerHTML = ether_value;
-  }).catch(function (e) {
-      console.error(e);
-  })
+    bet.state().then(function(value) {
+        updateHtmlValue('state', StatusEnum.properties[value.valueOf()].name);
+    }).catch(function(e) {
+        console.error(e);
+    });
 
-  bet.state().then(function(value) {
-      var htmlElement = document.getElementById('state');
-      htmlElement.innerHTML = StatusEnum.properties[value.valueOf()].name;
-  }).catch(function(e) {
-      console.error(e);
-  });
-
-  bet.pricelevel().then(function(value) {
-      var htmlElement = document.getElementById('pricelevel');
-      htmlElement.innerHTML = value.valueOf();
-  }).catch(function(e) {
-      console.error(e);
-  });
+    bet.pricelevel().then(function(value) {
+        updateHtmlValue('pricelevel', value.valueOf());
+    }).catch(function(e) {
+        console.error(e);
+    });
 
 };
 
 function refreshInteraction(account) {
-  var account_id_element = document.getElementById('account_id');
-  account_id_element.innerHTML = account;
+    var account_id_element = document.getElementById('account_id');
+    account_id_element.innerHTML = account;
 
-  var ether_value = web3.fromWei(account, 'ether');
-  var htmlElement = document.getElementById('balance');
-  htmlElement.innerHTML = Math.floor(ether_value);
+    var ether_value = web3.fromWei(account, 'ether');
+    var htmlElement = document.getElementById('balance');
+    htmlElement.innerHTML = Math.floor(ether_value);
 };
 
 function getAccount(index) {
-    return new Promise(function (resolve) {
+    return new Promise(function(resolve) {
         web3.eth.getAccounts(function(err, accs) {
             if (err != null) {
                 throw 'Error fetching accounts.';
@@ -90,7 +87,7 @@ function getAccount(index) {
 
 function updateButtons() {
     var bet = Bet.deployed();
-    bet.state().then(function (state) {
+    bet.state().then(function(state) {
         switch (parseInt(state)) {
             case StatusEnum.NEW:
                 document.getElementById('create_new_bet').disabled = false;
@@ -136,9 +133,11 @@ function placeBet() {
     var dateElements = betDateHtml.split('-');
     var betDate = new Date(dateElements[0], dateElements[1], dateElements[2]);
 
-    getAccount(0).then(function (account) {
+    getAccount(0).then(function(account) {
         var bet = Bet.deployed();
-        return bet.placeBet.sendTransaction(betDate.getTime(), {from: account});
+        return bet.placeBet.sendTransaction(betDate.getTime(), {
+            from: account
+        });
     }).then(function(txHash) {
         setStatus(AlertType.WARNING, 'Sent transaction', 'TxHash: ' + txHash);
         console.log('Sent transaction', 'TxHash: ' + txHash);
@@ -168,9 +167,12 @@ function createBet() {
     var endDate = new Date(dateElements[0], dateElements[1], dateElements[2]);
     var prizeInWei = web3.toWei(prizeAmount, 'ether');
 
-    getAccount(0).then(function (account) {
+    getAccount(0).then(function(account) {
         var bet = Bet.deployed();
-        return bet.create.sendTransaction(dollarValue, endDate.getTime(), {value: prizeInWei, from: account});
+        return bet.create.sendTransaction(dollarValue, endDate.getTime(), {
+            value: prizeInWei,
+            from: account
+        });
     }).then(function(txHash) {
         setStatus(AlertType.WARNING, 'Sent transaction', 'TxHash: ' + txHash);
         console.log('Sent transaction', 'TxHash: ' + txHash);
@@ -181,11 +183,11 @@ function createBet() {
         refreshDashboard();
         var bet = Bet.deployed();
         return bet.pricelevel();
-    }).then(function (pricelevel) {
+    }).then(function(pricelevel) {
         console.log('pricelevel after: ' + pricelevel);
         var bet = Bet.deployed();
         return bet.enddate();
-    }).then(function (enddate) {
+    }).then(function(enddate) {
         var endBettingDate = new Date();
         endBettingDate.setTime(enddate);
         console.log('enddate: ' + enddate + ', new enddate: ' + endBettingDate);
@@ -197,9 +199,11 @@ function createBet() {
 }
 
 function closeBetting() {
-    getAccount(0).then(function (account) {
+    getAccount(0).then(function(account) {
         var bet = Bet.deployed();
-        bet.closeBetting.sendTransaction({from:account})
+        bet.closeBetting.sendTransaction({
+            from: account
+        })
     }).then(function(txHash) {
         setStatus(AlertType.WARNING, 'Sent transaction', 'TxHash: ' + txHash);
         console.log('Sent transaction', 'TxHash: ' + txHash);
@@ -216,9 +220,11 @@ function closeBetting() {
 }
 
 function payPrize() {
-    getAccount(0).then(function (account) {
+    getAccount(0).then(function(account) {
         var bet = Bet.deployed();
-        bet.payout.sendTransaction(account, {from:account})
+        bet.payout.sendTransaction(account, {
+            from: account
+        })
     }).then(function(txHash) {
         setStatus(AlertType.WARNING, 'Sent transaction', 'TxHash: ' + txHash);
         console.log('Sent transaction', 'TxHash: ' + txHash);
@@ -282,9 +288,9 @@ window.onload = function() {
     switch (filename) {
         case 'interaction.html':
             updateButtons();
-            getAccount(0).then(function (account) {
+            getAccount(0).then(function(account) {
                 refreshInteraction(account);
-            }, function (reason) {
+            }, function(reason) {
                 console.error(reason);
             });
             break;
