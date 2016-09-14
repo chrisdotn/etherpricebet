@@ -1,4 +1,4 @@
-var work_account;
+// var work_account;
 
 var StatusEnum = {
     NEW: 0,
@@ -54,15 +54,6 @@ function refreshDashboard() {
         console.error(e);
     });
 
-};
-
-function refreshInteraction(account) {
-    var account_id_element = document.getElementById('account_id');
-    account_id_element.innerHTML = account;
-
-    var ether_value = web3.fromWei(account, 'ether');
-    var htmlElement = document.getElementById('balance');
-    htmlElement.innerHTML = Math.floor(ether_value);
 };
 
 function getAccount(index) {
@@ -279,26 +270,6 @@ function setStatus(type, message) {
 }
 
 window.onload = function() {
-    var base = window.location.href.split('/').pop();
-    var filename = base.split('?')[0];
-
-    console.log('Base: ' + base);
-    console.log('Filename: ' + filename);
-
-    switch (filename) {
-        case 'interaction.html':
-            updateButtons();
-            getAccount(0).then(function(account) {
-                refreshInteraction(account);
-            }, function(reason) {
-                console.error(reason);
-            });
-            break;
-        case 'index.html':
-            // fallthrough to default
-        default:
-            console.log("Choosing default");
-            refreshDashboard();
-            updateButtons();
-    }
+    refreshDashboard();
+    updateButtons();
 }
