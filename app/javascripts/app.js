@@ -127,29 +127,24 @@ function createBet() {
 
     getAccount(0).then(function(account) {
         var bet = Bet.deployed();
+
+        // start watching for event
+        var creationEvent = bet.Creation();
+
+        creationEvent.watch(function(error, result) {
+            if (!error) {
+                console.log('Bet created.');
+                setStatus(AlertType.SUCCESS, 'Tx mined: Bet created.');
+                refreshDashboard();
+                updateButtons();
+            } else {
+                console.error(error);
+            }
+        });
         return bet.create.sendTransaction(dollarValue, endDate.getTime(), {
             value: prizeInWei,
             from: account
         });
-    }).then(function(txHash) {
-        setStatus(AlertType.WARNING, 'Sent transaction', 'TxHash: ' + txHash);
-        console.log('Sent transaction', 'TxHash: ' + txHash);
-        return web3.eth.getTransaction(txHash);
-    }).then(function(transaction) {
-        setStatus(AlertType.SUCCESS, 'Bet created.');
-        console.log('Bet created.');
-        refreshDashboard();
-        var bet = Bet.deployed();
-        return bet.pricelevel();
-    }).then(function(pricelevel) {
-        console.log('pricelevel after: ' + pricelevel);
-        var bet = Bet.deployed();
-        return bet.enddate();
-    }).then(function(enddate) {
-        var endBettingDate = new Date();
-        endBettingDate.setTime(enddate);
-        console.log('enddate: ' + enddate + ', new enddate: ' + endBettingDate);
-        updateButtons();
     }).catch(function(e) {
         setStatus(AlertType.ERROR, 'An error occured in the transaction. See log for further information.');
         console.error('Something went wrong: ' + e);
