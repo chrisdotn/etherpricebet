@@ -1,5 +1,3 @@
-// var work_account;
-
 var StatusEnum = {
     NEW: 0,
     OPEN: 1,
@@ -113,37 +111,6 @@ function updateButtons() {
     });
 }
 
-function placeBet() {
-    var betDateHtml = document.getElementById('bet_date').value;
-
-    if (betDateHtml == '') {
-        setStatus(AlertType.ERROR, 'Must specify a date.');
-        throw 'Must specify a date.';
-    }
-
-    var dateElements = betDateHtml.split('-');
-    var betDate = new Date(dateElements[0], dateElements[1], dateElements[2]);
-
-    getAccount(0).then(function(account) {
-        var bet = Bet.deployed();
-        return bet.placeBet.sendTransaction(betDate.getTime(), {
-            from: account
-        });
-    }).then(function(txHash) {
-        setStatus(AlertType.WARNING, 'Sent transaction', 'TxHash: ' + txHash);
-        console.log('Sent transaction', 'TxHash: ' + txHash);
-        return web3.eth.getTransaction(txHash);
-    }).then(function(transaction) {
-        setStatus(AlertType.SUCCESS, 'Bet placed.');
-        console.log('Bet placed.');
-        updateButtons();
-    }).catch(function(e) {
-        setStatus(AlertType.ERROR, 'An error occured in the transaction. See log for further information.');
-        console.error('Something went wrong: ' + e);
-    });
-
-}
-
 function createBet() {
     var dollarValue = parseInt(document.getElementById('dollar_value').value);
     var endBettingDate = document.getElementById('end_betting_date').value;
@@ -187,6 +154,37 @@ function createBet() {
         setStatus(AlertType.ERROR, 'An error occured in the transaction. See log for further information.');
         console.error('Something went wrong: ' + e);
     });
+}
+
+function placeBet() {
+    var betDateHtml = document.getElementById('bet_date').value;
+
+    if (betDateHtml == '') {
+        setStatus(AlertType.ERROR, 'Must specify a date.');
+        throw 'Must specify a date.';
+    }
+
+    var dateElements = betDateHtml.split('-');
+    var betDate = new Date(dateElements[0], dateElements[1], dateElements[2]);
+
+    getAccount(0).then(function(account) {
+        var bet = Bet.deployed();
+        return bet.placeBet.sendTransaction(betDate.getTime(), {
+            from: account
+        });
+    }).then(function(txHash) {
+        setStatus(AlertType.WARNING, 'Sent transaction', 'TxHash: ' + txHash);
+        console.log('Sent transaction', 'TxHash: ' + txHash);
+        return web3.eth.getTransaction(txHash);
+    }).then(function(transaction) {
+        setStatus(AlertType.SUCCESS, 'Bet placed.');
+        console.log('Bet placed.');
+        updateButtons();
+    }).catch(function(e) {
+        setStatus(AlertType.ERROR, 'An error occured in the transaction. See log for further information.');
+        console.error('Something went wrong: ' + e);
+    });
+
 }
 
 function closeBetting() {
