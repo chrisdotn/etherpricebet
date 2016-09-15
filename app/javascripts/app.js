@@ -126,6 +126,7 @@ function createBet() {
     var prizeInWei = web3.toWei(prizeAmount, 'ether');
 
     getAccount(0).then(function(account) {
+        console.log('Retrieved account: ' + account);
         var bet = Bet.deployed();
 
         // start watching for event
@@ -133,8 +134,12 @@ function createBet() {
 
         creationEvent.watch(function(error, result) {
             if (!error) {
-                console.log('Bet created.');
+                console.log(result);
+                console.log('Tx mined. hash: \'' + result.transactionHash +
+                    '\', creator: \'' + result.args.creator +
+                    '\', price: ' + result.args.price + '$.');
                 setStatus(AlertType.SUCCESS, 'Tx mined: Bet created.');
+                creationEvent.stopWatching();
                 refreshDashboard();
                 updateButtons();
             } else {
