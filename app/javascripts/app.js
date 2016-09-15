@@ -134,17 +134,16 @@ function createBet() {
 
         creationEvent.watch(function(error, result) {
             if (!error) {
-                console.log(result);
                 console.log('Tx mined. hash: \'' + result.transactionHash +
                     '\', creator: \'' + result.args.creator +
                     '\', price: ' + result.args.price + '$.');
                 setStatus(AlertType.SUCCESS, 'Tx mined: Bet created.');
-                creationEvent.stopWatching();
                 refreshDashboard();
                 updateButtons();
             } else {
                 console.error(error);
             }
+            creationEvent.stopWatching();
         });
         return bet.create.sendTransaction(dollarValue, endDate.getTime(), {
             value: prizeInWei,
