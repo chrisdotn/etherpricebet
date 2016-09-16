@@ -149,24 +149,17 @@ function placeBet() {
     var dateElements = betDateHtml.split('-');
     var betDate = new Date(dateElements[0], dateElements[1], dateElements[2]);
 
+    console.log('Placing bet for ' + betDate..toISOString().slice(0,10));
+
     getAccount(0).then(function(account) {
         var bet = Bet.deployed();
         return bet.placeBet.sendTransaction(betDate.getTime(), {
             from: account
         });
-    }).then(function(txHash) {
-        setStatus(AlertType.WARNING, 'Sent transaction', 'TxHash: ' + txHash);
-        console.log('Sent transaction', 'TxHash: ' + txHash);
-        return web3.eth.getTransaction(txHash);
-    }).then(function(transaction) {
-        setStatus(AlertType.SUCCESS, 'Bet placed.');
-        console.log('Bet placed.');
-        updateButtons();
     }).catch(function(e) {
         setStatus(AlertType.ERROR, 'An error occured in the transaction. See log for further information.');
         console.error('Something went wrong: ' + e);
     });
-
 }
 
 function closeBetting() {
@@ -250,7 +243,6 @@ function startEventWatchers() {
     closingBettingEvent.watch(function (error, result) {
         if (!error) {
             setStatus(AlertType.SUCCESS, 'Betting closed.');
-            console.log(result);
             console.log('[Bet closed ] hash: \'' + result.transactionHash +
                 '\', creator: \'' + result.args.creator);
             refreshDashboard();
@@ -276,7 +268,23 @@ function startEventWatchers() {
         }
     });
 
+    var placedBetEvent = bet.PlacedBet();
 
+    placedBetEvent.watch(function (error, result) {
+        if (!error) {
+
+            var betDate = new Date(parseInt(result.args.date)).toISOString().slice(0,10);
+
+            console.log('[Bet placed ] hash: \'' + result.transactionHash +
+                '\', creator: \'' + result.args.creator +
+                '\', date: ' + betDate);
+            setStatus(AlertType.SUCCESS, 'Tx mined: Bet placed.');
+            refreshDashboard();
+            updateButtons();
+        } else {
+            console.error(error);
+        }
+    });
 }
 
 window.onload = function() {

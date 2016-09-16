@@ -18,6 +18,11 @@ contract Bet is Mortal {
         address indexed creator
     );
 
+    event PlacedBet(
+        address indexed creator,
+        uint indexed date
+    );
+
     function Bet() {
         state = State.New;
         pricelevel = 0;
@@ -70,6 +75,8 @@ contract Bet is Mortal {
         }
 
         bets[msg.sender] = date;
+
+        PlacedBet(msg.sender, date);
     }
 
     function payout(address winner) returns (bool) {
