@@ -126,25 +126,8 @@ function createBet() {
     var prizeInWei = web3.toWei(prizeAmount, 'ether');
 
     getAccount(0).then(function(account) {
-        console.log('Retrieved account: ' + account);
         var bet = Bet.deployed();
 
-        // start watching for event
-        var creationEvent = bet.Creation();
-
-        creationEvent.watch(function(error, result) {
-            if (!error) {
-                console.log('Tx mined. hash: \'' + result.transactionHash +
-                    '\', creator: \'' + result.args.creator +
-                    '\', price: ' + result.args.price + '$.');
-                setStatus(AlertType.SUCCESS, 'Tx mined: Bet created.');
-                refreshDashboard();
-                updateButtons();
-            } else {
-                console.error(error);
-            }
-            creationEvent.stopWatching();
-        });
         return bet.create.sendTransaction(dollarValue, endDate.getTime(), {
             value: prizeInWei,
             from: account
@@ -189,18 +172,10 @@ function placeBet() {
 function closeBetting() {
     getAccount(0).then(function(account) {
         var bet = Bet.deployed();
-        bet.closeBetting.sendTransaction({
+
+        return bet.closeBetting.sendTransaction({
             from: account
-        })
-    }).then(function(txHash) {
-        setStatus(AlertType.WARNING, 'Sent transaction', 'TxHash: ' + txHash);
-        console.log('Sent transaction', 'TxHash: ' + txHash);
-        return web3.eth.getTransaction(txHash);
-    }).then(function(transaction) {
-        setStatus(AlertType.SUCCESS, 'Betting closed.');
-        console.log('Betting closed.');
-        refreshDashboard();
-        updateButtons();
+        });
     }).catch(function(e) {
         setStatus(AlertType.ERROR, 'An error occured in the transaction. See log for further information.');
         console.error('Something went wrong: ' + e);
@@ -266,7 +241,46 @@ function setStatus(type, message) {
     messageElement.innerHTML = message;
 }
 
+function startEventWatchers() {
+
+    var bet = Bet.deployed();
+
+    var closingBettingEvent = bet.ClosingBetting();
+
+    closingBettingEvent.watch(function (error, result) {
+        if (!error) {
+            setStatus(AlertType.SUCCESS, 'Betting closed.');
+            console.log(result);
+            console.log('[Bet closed ] hash: \'' + result.transactionHash +
+                '\', creator: \'' + result.args.creator);
+            refreshDashboard();
+            updateButtons();
+        } else {
+            console.error('Something went wrong: ' + error);
+        }
+    });
+
+    // start watching for event
+    var creationEvent = bet.Creation();
+
+    creationEvent.watch(function(error, result) {
+        if (!error) {
+            console.log('[Bet created] hash: \'' + result.transactionHash +
+                '\', creator: \'' + result.args.creator +
+                '\', price: ' + result.args.price + '$.');
+            setStatus(AlertType.SUCCESS, 'Tx mined: Bet created.');
+            refreshDashboard();
+            updateButtons();
+        } else {
+            console.error(error);
+        }
+    });
+
+
+}
+
 window.onload = function() {
     refreshDashboard();
     updateButtons();
+    startEventWatchers();
 }

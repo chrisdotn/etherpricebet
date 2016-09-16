@@ -14,6 +14,10 @@ contract Bet is Mortal {
         uint indexed end
     );
 
+    event ClosingBetting(
+        address indexed creator
+    );
+
     function Bet() {
         state = State.New;
         pricelevel = 0;
@@ -37,7 +41,7 @@ contract Bet is Mortal {
         pricelevel = price;
         enddate = end;
         state = State.Open;
-        
+
         Creation(msg.sender, price, end);
     }
 
@@ -49,6 +53,8 @@ contract Bet is Mortal {
         }
 
         state = State.Closed;
+
+        ClosingBetting(msg.sender);
     }
 
     function placeBet (uint date) {
