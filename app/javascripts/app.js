@@ -254,7 +254,7 @@ function startEventWatchers() {
                 '\', creator: \'' + result.args.creator +
                 '\', price: ' + result.args.price + '$' +
                 ', round: ' + result.args.round +
-                ', jackpot: ' + result.args.jackpot + ' ether.');
+                ', jackpot: ' + web3.fromWei(result.args.jackpot, 'ether') + ' ether.');
             setStatus(AlertType.SUCCESS, 'Tx mined: Bet created.');
             refreshDashboard();
             updateButtons();
@@ -287,7 +287,7 @@ function startEventWatchers() {
             console.log('[Prize paid ] hash: \'' + result.transactionHash +
                 '\', creator: \'' + result.args.creator +
                 '\', winner: \'' + result.args.winner +
-                '\', prize: ' + result.args.prize + ' ether.');
+                '\', prize: ' + web3.fromWei(result.args.prize, 'ether') + ' ether.');
             setStatus(AlertType.SUCCESS, 'Tx mined: Prize paid out.');
             refreshDashboard();
             updateButtons();
