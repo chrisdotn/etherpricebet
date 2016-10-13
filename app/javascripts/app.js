@@ -104,22 +104,22 @@ function updateButtons() {
 
 function createBet() {
     var dollarValue = parseInt(document.getElementById('dollar_value').value);
-    var endBettingDate = document.getElementById('end_betting_date').value;
+    //var endBettingDate = document.getElementById('end_betting_date').value;
     var prizeAmount = parseInt(document.getElementById('prize_amount').value);
 
-    if (isNaN(dollarValue) || endBettingDate == '' || isNaN(prizeAmount)) {
-        setStatus(AlertType.ERROR, 'Must specify a dollar value and/or enddate.');
-        throw 'Must specify a dollar value and/or enddate.';
+    if (isNaN(dollarValue) || isNaN(prizeAmount)) {
+        setStatus(AlertType.ERROR, 'Must specify a dollar value and the prize.');
+        throw 'Must specify a dollar value and the prize.';
     }
 
-    var dateElements = endBettingDate.split('-');
-    var endDate = new Date(dateElements[0], dateElements[1], dateElements[2]);
+    //var dateElements = endBettingDate.split('-');
+    //var endDate = new Date(dateElements[0], dateElements[1], dateElements[2]);
     var prizeInWei = web3.toWei(prizeAmount, 'ether');
 
     getAccount(0).then(function(account) {
         var bet = Bet.deployed();
 
-        return bet.create.sendTransaction(dollarValue, endDate.getTime(), {
+        return bet.create.sendTransaction(dollarValue, {
             value: prizeInWei,
             from: account
         });
@@ -254,7 +254,7 @@ function startEventWatchers() {
                 '\', creator: \'' + result.args.creator +
                 '\', price: ' + result.args.price + '$' +
                 ', round: ' + result.args.round +
-                ', jackpot: ' + result.args.jackpot + ' ether.');
+                ', jackpot: ' + web3.fromWei(result.args.jackpot, 'ether') + ' ether.');
             setStatus(AlertType.SUCCESS, 'Tx mined: Bet created.');
             refreshDashboard();
             updateButtons();
@@ -287,7 +287,7 @@ function startEventWatchers() {
             console.log('[Prize paid ] hash: \'' + result.transactionHash +
                 '\', creator: \'' + result.args.creator +
                 '\', winner: \'' + result.args.winner +
-                '\', prize: ' + result.args.prize + ' ether.');
+                '\', prize: ' + web3.fromWei(result.args.prize, 'ether') + ' ether.');
             setStatus(AlertType.SUCCESS, 'Tx mined: Prize paid out.');
             refreshDashboard();
             updateButtons();
