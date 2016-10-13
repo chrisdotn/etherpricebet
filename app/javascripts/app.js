@@ -12,9 +12,6 @@ var StatusEnum = {
         },
         2: {
             name: 'closed'
-        },
-        3: {
-            name: 'ended'
         }
     }
 };
@@ -96,12 +93,6 @@ function updateButtons() {
                 document.getElementById('close_betting').disabled = true;
                 document.getElementById('pay').disabled = false;
                 break;
-            case StatusEnum.ENDED:
-                document.getElementById('create_new_bet').disabled = false;
-                document.getElementById('place_bet').disabled = true;
-                document.getElementById('close_betting').disabled = true;
-                document.getElementById('pay').disabled = true;
-                break;
             default:
                 document.getElementById('create_new_bet').disabled = true;
                 document.getElementById('place_bet').disabled = true;
@@ -149,7 +140,7 @@ function placeBet() {
     var dateElements = betDateHtml.split('-');
     var betDate = new Date(dateElements[0], dateElements[1], dateElements[2]);
 
-    console.log('Placing bet for ' + betDate..toISOString().slice(0,10));
+    console.log('Placing bet for ' + betDate.toISOString().slice(0, 10));
 
     getAccount(0).then(function(account) {
         var bet = Bet.deployed();
@@ -178,22 +169,24 @@ function closeBetting() {
 function payPrize() {
     getAccount(0).then(function(account) {
         var bet = Bet.deployed();
-        bet.payout.sendTransaction(account, {
-            from: account
-        })
-    }).then(function(txHash) {
-        setStatus(AlertType.WARNING, 'Sent transaction', 'TxHash: ' + txHash);
-        console.log('Sent transaction', 'TxHash: ' + txHash);
-        return web3.eth.getTransaction(txHash);
-    }).then(function(transaction) {
-        setStatus(AlertType.SUCCESS, 'Prize paid out.');
-        console.log('Prize paid out.');
-        refreshDashboard();
-        updateButtons();
+        return bet.payout.sendTransaction(account, {
+            from: account,
+            gas: "0x186a0"
+        });
     }).catch(function(e) {
         setStatus(AlertType.ERROR, 'An error occured in the transaction. See log for further information.');
         console.error('Something went wrong: ' + e);
     });
+    // .then(function(txHash) {
+    //     setStatus(AlertType.WARNING, 'Sent transaction', 'TxHash: ' + txHash);
+    //     console.log('Sent transaction', 'TxHash: ' + txHash);
+    //     return web3.eth.getTransaction(txHash);
+    // }).then(function(transaction) {
+    //     setStatus(AlertType.SUCCESS, 'Prize paid out.');
+    //     console.log('Prize paid out.');
+    //     refreshDashboard();
+    //     updateButtons();
+    // })
 }
 
 function hideMessage() {
@@ -240,7 +233,7 @@ function startEventWatchers() {
 
     var closingBettingEvent = bet.ClosingBetting();
 
-    closingBettingEvent.watch(function (error, result) {
+    closingBettingEvent.watch(function(error, result) {
         if (!error) {
             setStatus(AlertType.SUCCESS, 'Betting closed.');
             console.log('[Bet closed ] hash: \'' + result.transactionHash +
@@ -259,7 +252,9 @@ function startEventWatchers() {
         if (!error) {
             console.log('[Bet created] hash: \'' + result.transactionHash +
                 '\', creator: \'' + result.args.creator +
-                '\', price: ' + result.args.price + '$.');
+                '\', price: ' + result.args.price + '$' +
+                ', round: ' + result.args.round +
+                ', jackpot: ' + result.args.jackpot + ' ether.');
             setStatus(AlertType.SUCCESS, 'Tx mined: Bet created.');
             refreshDashboard();
             updateButtons();
@@ -270,15 +265,30 @@ function startEventWatchers() {
 
     var placedBetEvent = bet.PlacedBet();
 
-    placedBetEvent.watch(function (error, result) {
+    placedBetEvent.watch(function(error, result) {
         if (!error) {
-
-            var betDate = new Date(parseInt(result.args.date)).toISOString().slice(0,10);
+            var betDate = new Date(parseInt(result.args.date)).toISOString().slice(0, 10);
 
             console.log('[Bet placed ] hash: \'' + result.transactionHash +
                 '\', creator: \'' + result.args.creator +
                 '\', date: ' + betDate);
             setStatus(AlertType.SUCCESS, 'Tx mined: Bet placed.');
+            refreshDashboard();
+            updateButtons();
+        } else {
+            console.error(error);
+        }
+    });
+
+    var payoutEvent = bet.Payout();
+
+    payoutEvent.watch(function(error, result) {
+        if (!error) {
+            console.log('[Prize paid ] hash: \'' + result.transactionHash +
+                '\', creator: \'' + result.args.creator +
+                '\', winner: \'' + result.args.winner +
+                '\', prize: ' + result.args.prize + ' ether.');
+            setStatus(AlertType.SUCCESS, 'Tx mined: Prize paid out.');
             refreshDashboard();
             updateButtons();
         } else {

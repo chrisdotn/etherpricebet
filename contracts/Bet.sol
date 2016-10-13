@@ -1,17 +1,21 @@
 import "./Mortal.sol";
 
 contract Bet is Mortal {
-    enum State { New, Open, Closed, Ended }
+    enum State { New, Open, Closed }
 
     State public state;
     uint public pricelevel;
     uint public enddate;
+    uint public round;
     mapping (address => uint) public bets;
+    mapping (address => uint) public rounds;
 
     event Creation(
         address indexed creator,
         uint indexed price,
-        uint indexed end
+        uint indexed end,
+        uint jackpot,
+        uint round
     );
 
     event ClosingBetting(
@@ -20,7 +24,14 @@ contract Bet is Mortal {
 
     event PlacedBet(
         address indexed creator,
-        uint indexed date
+        uint indexed date,
+        uint round
+    );
+
+    event Payout(
+        address indexed creator,
+        address indexed winner,
+        uint indexed prize
     );
 
     function Bet() {
@@ -46,8 +57,9 @@ contract Bet is Mortal {
         pricelevel = price;
         enddate = end;
         state = State.Open;
+        round++;
 
-        Creation(msg.sender, price, end);
+        Creation(msg.sender, price, end, this.balance, round);
     }
 
     function closeBetting() {
@@ -70,32 +82,29 @@ contract Bet is Mortal {
         }
 
         // only one bet allowed, else throw
-        if (bets[msg.sender] != 0) {
+        if (rounds[msg.sender] == round) {
             throw;
         }
 
         bets[msg.sender] = date;
+        rounds[msg.sender] = round;
 
-        PlacedBet(msg.sender, date);
+        PlacedBet(msg.sender, date, round);
     }
 
     function payout(address winner) returns (bool) {
-        if (bets[winner] == 0) {
+        if (rounds[winner] != round) {
             throw;
         }
 
         pricelevel = 0;
         enddate = 0;
-        state = State.Ended;
-
-        // send money to winner
-        //uint amount = this.balance;
-        //this.balance = 0;
+        state = State.New;
 
         if (winner.send(this.balance)) {
+            Payout(msg.sender, winner, bets[winner]);
             return true;
         } else {
-            //this.balance = amount;
             return false;
         }
     }
