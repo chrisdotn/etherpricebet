@@ -97,8 +97,10 @@ contract Bet is Mortal {
         pricelevel = 0;
         state = State.New;
 
+        uint jackpot = this.balance;
+
         if (winner.send(this.balance)) {
-            Payout(msg.sender, winner, bets[winner]);
+            Payout(msg.sender, winner, jackpot);
             return true;
         } else {
             return false;
