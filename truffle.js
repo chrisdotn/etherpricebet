@@ -15,14 +15,18 @@ module.exports = {
     networks: {
         "live": {
             network_id: 1, // Ethereum public network
+            host: "localhost",
+            port: 8548
         },
         "morden": {
             network_id: 2, // Official Ethereum test network
-            host: "127.0.0.1", // FIXME: fill a valid morden IP
-            port: 80
+            host: "localhost",
+            port: 8547
         },
         "staging": {
-            network_id: 1337 // custom private network
+            network_id: 42, // custom private network
+            host: "localhost",
+            port: 8546
         },
         "development": {
             network_id: "default"
