@@ -5,7 +5,6 @@ contract Bet is Mortal {
 
     State public state;
     uint public pricelevel;
-    uint public enddate;
     uint public round;
     mapping (address => uint) public bets;
     mapping (address => uint) public rounds;
@@ -13,7 +12,6 @@ contract Bet is Mortal {
     event Creation(
         address indexed creator,
         uint indexed price,
-        uint indexed end,
         uint jackpot,
         uint round
     );
@@ -47,7 +45,7 @@ contract Bet is Mortal {
         pricelevel = level;
     }
 
-    function create(uint price, uint end) {
+    function create(uint price) {
 
         // new bets are only allowed in state State.New or State.Ended
         if (state != State.New) {
@@ -55,11 +53,10 @@ contract Bet is Mortal {
         }
 
         pricelevel = price;
-        enddate = end;
         state = State.Open;
         round++;
 
-        Creation(msg.sender, price, end, this.balance, round);
+        Creation(msg.sender, price, this.balance, round);
     }
 
     function closeBetting() {
@@ -98,7 +95,6 @@ contract Bet is Mortal {
         }
 
         pricelevel = 0;
-        enddate = 0;
         state = State.New;
 
         if (winner.send(this.balance)) {
