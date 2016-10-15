@@ -166,6 +166,18 @@ function closeBetting() {
     });
 }
 
+function evaluateBet() {
+    getAccount(0).then(function(account) {
+        var bet = Bet.deployed();
+        return bet.evaluateBet.sendTransaction({
+            from: account,
+        });
+    }).catch(function(e) {
+        setStatus(AlertType.ERROR, 'An error occured in the transaction. See log for further information.');
+        console.error('Something went wrong: ' + e);
+    });
+}
+
 function payPrize() {
     getAccount(0).then(function(account) {
         var bet = Bet.deployed();
@@ -289,6 +301,22 @@ function startEventWatchers() {
                 '\', winner: \'' + result.args.winner +
                 '\', prize: ' + web3.fromWei(result.args.prize, 'ether') + ' ether.');
             setStatus(AlertType.SUCCESS, 'Tx mined: Prize paid out.');
+            refreshDashboard();
+            updateButtons();
+        } else {
+            console.error(error);
+        }
+    });
+
+    var determinedWinnerEvent = bet.DeterminedWinner();
+
+    determinedWinnerEvent.watch(function (error, result) {
+        if (!error) {
+            console.log('[Got Winner] winner: ' + result.args.winner +
+            ', bet: ' + result.args.bet +
+            ', result: ' + result.args.result +
+            ', diff: ' + result.args.difference);
+            setStatus(AlertType.ALERT, 'Determined Winner');
             refreshDashboard();
             updateButtons();
         } else {
