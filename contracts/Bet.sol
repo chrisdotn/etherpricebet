@@ -6,6 +6,9 @@ contract Bet is Mortal {
     State public state;
     uint public pricelevel;
     uint public round;
+    address[] betters;
+    address winner;
+
     mapping (address => uint) public bets;
     mapping (address => uint) public rounds;
 
@@ -32,6 +35,13 @@ contract Bet is Mortal {
         uint indexed prize
     );
 
+    event DeterminedWinner(
+        address indexed winner,
+        uint bet,
+        uint result,
+        uint difference
+    );
+
     function Bet() {
         state = State.New;
         pricelevel = 0;
@@ -52,6 +62,7 @@ contract Bet is Mortal {
             throw;
         }
 
+        betters.length = 0;
         pricelevel = price;
         state = State.Open;
         round++;
@@ -83,13 +94,44 @@ contract Bet is Mortal {
             throw;
         }
 
+        betters.push(msg.sender);
         bets[msg.sender] = date;
         rounds[msg.sender] = round;
 
         PlacedBet(msg.sender, date, round);
     }
 
-    function payout(address winner) returns (bool) {
+    function determineWinner(uint date) returns(address) {
+        address currentWinner;
+        uint currentDiff = 999999999999;
+
+        for (uint i=0; i<betters.length; i++) {
+
+            uint difference = 0;
+
+            if (bets[betters[i]] > date) {
+                difference = bets[betters[i]] - date;
+            } else {
+                difference = date - bets[betters[i]];
+            }
+
+            if (difference < currentDiff) {
+                currentDiff = difference;
+                currentWinner = betters[i];
+            }
+        }
+
+        DeterminedWinner(currentWinner, bets[currentWinner], date, currentDiff);
+
+        return currentWinner;
+    }
+
+    function evaluateBet() returns (bool) {
+        // 1476655200000 is 2016-10-17
+        winner = determineWinner(1476655200000);
+    }
+
+    function payout() returns (bool) {
         if (rounds[winner] != round) {
             throw;
         }
