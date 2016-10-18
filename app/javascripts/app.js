@@ -189,16 +189,6 @@ function payPrize() {
         setStatus(AlertType.ERROR, 'An error occured in the transaction. See log for further information.');
         console.error('Something went wrong: ' + e);
     });
-    // .then(function(txHash) {
-    //     setStatus(AlertType.WARNING, 'Sent transaction', 'TxHash: ' + txHash);
-    //     console.log('Sent transaction', 'TxHash: ' + txHash);
-    //     return web3.eth.getTransaction(txHash);
-    // }).then(function(transaction) {
-    //     setStatus(AlertType.SUCCESS, 'Prize paid out.');
-    //     console.log('Prize paid out.');
-    //     refreshDashboard();
-    //     updateButtons();
-    // })
 }
 
 function hideMessage() {

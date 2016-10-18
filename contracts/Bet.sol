@@ -106,12 +106,13 @@ contract Bet is Mortal {
         uint currentDiff = 999999999999;
 
         for (uint i=0; i<betters.length; i++) {
+
             uint difference = 0;
 
             if (bets[betters[i]] > date) {
-                difference = date - bets[betters[i]];
-            } else {
                 difference = bets[betters[i]] - date;
+            } else {
+                difference = date - bets[betters[i]];
             }
 
             if (difference < currentDiff) {
