@@ -138,8 +138,13 @@ function placeBet() {
     }
 
     var dateElements = betDateHtml.split('-');
-    var betDate = new Date(dateElements[0], dateElements[1], dateElements[2]);
+    console.log('input: ' + betDateHtml +
+        ', elements: ' + dateElements[0] +
+        ', ' + dateElements[1] +
+        ', ' + dateElements[2]);
 
+    var betDate = new Date(Date.UTC(dateElements[0], (dateElements[1]-1), dateElements[2]));
+    console.log('Bet Date: ' + betDate);
     console.log('Placing bet for ' + betDate.toISOString().slice(0, 10));
 
     getAccount(0).then(function(account) {
