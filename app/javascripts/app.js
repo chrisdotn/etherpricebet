@@ -112,8 +112,6 @@ function createBet() {
         throw 'Must specify a dollar value and the prize.';
     }
 
-    //var dateElements = endBettingDate.split('-');
-    //var endDate = new Date(dateElements[0], dateElements[1], dateElements[2]);
     var prizeInWei = web3.toWei(prizeAmount, 'ether');
 
     getAccount(0).then(function(account) {
@@ -138,9 +136,7 @@ function placeBet() {
     }
 
     var dateElements = betDateHtml.split('-');
-    var betDate = new Date(dateElements[0], dateElements[1], dateElements[2]);
-
-    console.log('Placing bet for ' + betDate.toISOString().slice(0, 10));
+    var betDate = new Date(Date.UTC(dateElements[0], (dateElements[1]-1), dateElements[2]));
 
     getAccount(0).then(function(account) {
         var bet = Bet.deployed();
@@ -302,7 +298,7 @@ function startEventWatchers() {
 
     determinedWinnerEvent.watch(function (error, result) {
         if (!error) {
-            console.log('[Got Winner] winner: ' + result.args.winner +
+            console.log('[Got Winner ] winner: ' + result.args.winner +
             ', bet: ' + result.args.bet +
             ', result: ' + result.args.result +
             ', diff: ' + result.args.difference);
