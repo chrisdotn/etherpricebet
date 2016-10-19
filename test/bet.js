@@ -14,6 +14,14 @@ contract('Bet', function(accounts) {
     }).then(done).catch(done);
   });
 
+  it("should have 0 balance", function (done) {
+      var bet = Bet.deployed();
+
+      bet.getBalance().then(function(balance) {
+          assert.equal(balance, 0);
+      }).then(done).catch(done);
+  });
+
   // it("should call a function that depends on a linked library  ", function(done){
   //   var meta = MetaCoin.deployed();
   //   var metaCoinBalance;
