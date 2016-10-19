@@ -1,7 +1,7 @@
 import "./Mortal.sol";
 
 contract Bet is Mortal {
-    enum State { New, Open, Closed }
+    enum State { New, Open, Closed, Won }
 
     State public state;
     uint public pricelevel;
@@ -42,6 +42,10 @@ contract Bet is Mortal {
         uint difference
     );
 
+    event Error(
+        string indexed message
+    );
+
     function Bet() {
         state = State.New;
         pricelevel = 0;
@@ -57,7 +61,7 @@ contract Bet is Mortal {
 
     function create(uint price) {
 
-        // new bets are only allowed in state State.New or State.Ended
+        // new bets are only allowed in state State.New
         if (state != State.New) {
             throw;
         }
@@ -72,7 +76,7 @@ contract Bet is Mortal {
 
     function closeBetting() {
 
-        // closing the betting period is allowd during State.Open bet only
+        // closing the betting period is allowed during State.Open only
         if (state != State.Open) {
             throw;
         }
@@ -102,6 +106,7 @@ contract Bet is Mortal {
     }
 
     function determineWinner(uint date) returns(address) {
+
         address currentWinner;
         uint currentDiff = 999999999999;
 
@@ -121,30 +126,55 @@ contract Bet is Mortal {
             }
         }
 
-        DeterminedWinner(currentWinner, bets[currentWinner], date, currentDiff);
-
         return currentWinner;
     }
 
     function evaluateBet() returns (bool) {
-        // 1476655200000 is 2016-10-17
-        winner = determineWinner(1476655200000);
-    }
 
-    function payout() returns (bool) {
-        if (rounds[winner] != round) {
+        // determine winner is allowed in State.Closed only
+        if (state != State.Closed) {
             throw;
         }
 
-        pricelevel = 0;
-        state = State.New;
+        // 1476655200000 is 2016-10-17
+        uint result = 1476655200000;
+        address winner = determineWinner(1476655200000);
+
+        uint difference = 0;
+        if (result > bets[winner]) {
+            difference = result - bets[winner];
+        } else {
+            difference = bets[winner] - result;
+        }
+
+        DeterminedWinner(winner, bets[winner], result, difference);
+
+        state = State.Won;
+
+        return true;
+    }
+
+    function payout() returns (bool) {
+
+        // payout is allowed in State.Won only
+        if (state != State.Won) {
+            Error('State is not WON');
+            throw;
+        }
+        if (rounds[winner] != round) {
+            Error('Rounds is not proper');
+            throw;
+        }
 
         uint jackpot = this.balance;
 
         if (winner.send(this.balance)) {
             Payout(msg.sender, winner, jackpot);
+            pricelevel = 0;
+            state = State.New;
             return true;
         } else {
+            Error('Payout failed.');
             return false;
         }
     }
