@@ -104,14 +104,14 @@ contract Bet is Mortal {
         ClosingBetting(msg.sender);
     }
 
-    function determineWinner(uint result) returns(address) {
-
+    function determineWinner(uint result) constant returns(bool, address, uint) {
         address currentWinner;
         uint currentDiff = 999999999999;
+        bool foundWinner = false;
 
         for (uint i=0; i<betters.length; i++) {
 
-            uint difference = 0;
+            uint difference = 999999999999;
 
             PriceBet bet = bets[betters[i]];
 
@@ -124,10 +124,10 @@ contract Bet is Mortal {
             if (difference < currentDiff) {
                 currentDiff = difference;
                 currentWinner = betters[i];
+                foundWinner = true;
             }
         }
-
-        return currentWinner;
+        return (foundWinner, currentWinner, currentDiff);
     }
 
     function evaluateBet() returns (bool) {
@@ -138,20 +138,20 @@ contract Bet is Mortal {
         }
 
         // 1476655200000 is 2016-10-17
+        // TODO call oracalize here
         uint result = 1476655200000;
-        winner = determineWinner(result);
+        var (foundWinner, winningAddress, difference) = determineWinner(result);
 
-        uint difference = 0;
-        if (result > bets[winner].date) {
-            difference = result - bets[winner].date;
-        } else {
-            difference = bets[winner].date - result;
+        if (!foundWinner) {
+            // TODO need to refund original creator
+            Error('Found no winner');
+            return false;
         }
 
-        DeterminedWinner(winner, bets[winner].date, result, difference);
-
+        winner = winningAddress;
         state = State.Won;
 
+        DeterminedWinner(winner, bets[winner].date, result, difference);
         return true;
     }
 

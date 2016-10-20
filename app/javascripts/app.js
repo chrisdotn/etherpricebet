@@ -326,7 +326,7 @@ function startEventWatchers() {
     var errorEvent = bet.Error();
     errorEvent.watch(function (error, result) {
         if (!error) {
-            console.error('[Solidity Error] ' + result.args.message);
+            console.log('[Solidity Error] ' + result.args.message);
         } else {
             console.error(e);
         }
