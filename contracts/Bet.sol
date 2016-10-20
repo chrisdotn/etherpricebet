@@ -3,14 +3,18 @@ import "./Mortal.sol";
 contract Bet is Mortal {
     enum State { New, Open, Closed, Won }
 
+    struct PriceBet {
+        uint round;
+        uint date;
+    }
+
     State public state;
     uint public pricelevel;
     uint public round;
-    address[] betters;
     address winner;
 
-    mapping (address => uint) public bets;
-    mapping (address => uint) public rounds;
+    address[] betters;
+    mapping (address => PriceBet) public bets;
 
     event Creation(
         address indexed creator,
@@ -48,15 +52,10 @@ contract Bet is Mortal {
 
     function Bet() {
         state = State.New;
-        pricelevel = 0;
     }
 
     function getBalance() constant returns (uint balance) {
         return this.balance;
-    }
-
-    function setPriceLevel(uint level) {
-        pricelevel = level;
     }
 
     function create(uint price) {
@@ -66,6 +65,7 @@ contract Bet is Mortal {
             throw;
         }
 
+        winner = 0;
         betters.length = 0;
         pricelevel = price;
         state = State.Open;
@@ -94,18 +94,17 @@ contract Bet is Mortal {
         }
 
         // only one bet allowed, else throw
-        if (rounds[msg.sender] == round) {
+        if (bets[msg.sender].round == round) {
             throw;
         }
 
         betters.push(msg.sender);
-        bets[msg.sender] = date;
-        rounds[msg.sender] = round;
+        bets[msg.sender] = PriceBet(round, date);
 
         PlacedBet(msg.sender, date, round);
     }
 
-    function determineWinner(uint date) returns(address) {
+    function determineWinner(uint result) returns(address) {
 
         address currentWinner;
         uint currentDiff = 999999999999;
@@ -114,10 +113,12 @@ contract Bet is Mortal {
 
             uint difference = 0;
 
-            if (bets[betters[i]] > date) {
-                difference = bets[betters[i]] - date;
+            PriceBet bet = bets[betters[i]];
+
+            if (bet.date > result) {
+                difference = bet.date - result;
             } else {
-                difference = date - bets[betters[i]];
+                difference = result - bet.date;
             }
 
             if (difference < currentDiff) {
@@ -141,13 +142,13 @@ contract Bet is Mortal {
         winner = determineWinner(result);
 
         uint difference = 0;
-        if (result > bets[winner]) {
-            difference = result - bets[winner];
+        if (result > bets[winner].date) {
+            difference = result - bets[winner].date;
         } else {
-            difference = bets[winner] - result;
+            difference = bets[winner].date - result;
         }
 
-        DeterminedWinner(winner, bets[winner], result, difference);
+        DeterminedWinner(winner, bets[winner].date, result, difference);
 
         state = State.Won;
 
@@ -162,8 +163,7 @@ contract Bet is Mortal {
             throw;
         }
 
-
-        if (rounds[winner] != round) {
+        if (bets[winner].round != round) {
             Error('Rounds is not proper');
             throw;
         }
