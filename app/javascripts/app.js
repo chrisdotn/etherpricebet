@@ -191,8 +191,8 @@ function payPrize() {
     getAccount(0).then(function(account) {
         var bet = Bet.deployed();
         return bet.payout.sendTransaction(account, {
-            from: account
-            //gas: "0xf4240"
+            from: account,
+            gas: "0x65fb0"
         });
     }).catch(function(e) {
         setStatus(AlertType.ERROR, 'An error occured in the transaction. See log for further information.');

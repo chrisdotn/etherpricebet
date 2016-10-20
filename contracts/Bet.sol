@@ -43,7 +43,7 @@ contract Bet is Mortal {
     );
 
     event Error(
-        string indexed message
+        string message
     );
 
     function Bet() {
@@ -138,7 +138,7 @@ contract Bet is Mortal {
 
         // 1476655200000 is 2016-10-17
         uint result = 1476655200000;
-        address winner = determineWinner(1476655200000);
+        winner = determineWinner(result);
 
         uint difference = 0;
         if (result > bets[winner]) {
@@ -161,6 +161,8 @@ contract Bet is Mortal {
             Error('State is not WON');
             throw;
         }
+
+
         if (rounds[winner] != round) {
             Error('Rounds is not proper');
             throw;
