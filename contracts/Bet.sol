@@ -58,10 +58,6 @@ contract Bet is Mortal {
         return this.balance;
     }
 
-    function setPriceLevel(uint level) {
-        pricelevel = level;
-    }
-
     function create(uint price) {
 
         // new bets are only allowed in state State.New
