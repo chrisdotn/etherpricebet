@@ -2,7 +2,7 @@ var StatusEnum = {
     NEW: 0,
     OPEN: 1,
     CLOSED: 2,
-    ENDED: 3,
+    WON: 3,
     properties: {
         0: {
             name: 'new'
@@ -12,6 +12,9 @@ var StatusEnum = {
         },
         2: {
             name: 'closed'
+        },
+        3: {
+            name: 'won'
         }
     }
 };
@@ -79,24 +82,35 @@ function updateButtons() {
                 document.getElementById('create_new_bet').disabled = false;
                 document.getElementById('place_bet').disabled = true;
                 document.getElementById('close_betting').disabled = true;
+                document.getElementById('evaluate').disabled = true;
                 document.getElementById('pay').disabled = true;
                 break;
             case StatusEnum.OPEN:
                 document.getElementById('create_new_bet').disabled = true;
                 document.getElementById('place_bet').disabled = false;
                 document.getElementById('close_betting').disabled = false;
+                document.getElementById('evaluate').disabled = true;
                 document.getElementById('pay').disabled = true;
                 break;
             case StatusEnum.CLOSED:
                 document.getElementById('create_new_bet').disabled = true;
                 document.getElementById('place_bet').disabled = true;
                 document.getElementById('close_betting').disabled = true;
+                document.getElementById('evaluate').disabled = false;
+                document.getElementById('pay').disabled = true;
+                break;
+            case StatusEnum.WON:
+                document.getElementById('create_new_bet').disabled = true;
+                document.getElementById('place_bet').disabled = true;
+                document.getElementById('close_betting').disabled = true;
+                document.getElementById('evaluate').disabled = true;
                 document.getElementById('pay').disabled = false;
                 break;
             default:
                 document.getElementById('create_new_bet').disabled = true;
                 document.getElementById('place_bet').disabled = true;
                 document.getElementById('close_betting').disabled = true;
+                document.getElementById('evaluate').disabled = true;
                 document.getElementById('pay').disabled = true;
         }
     });
@@ -104,7 +118,6 @@ function updateButtons() {
 
 function createBet() {
     var dollarValue = parseInt(document.getElementById('dollar_value').value);
-    //var endBettingDate = document.getElementById('end_betting_date').value;
     var prizeAmount = parseInt(document.getElementById('prize_amount').value);
 
     if (isNaN(dollarValue) || isNaN(prizeAmount)) {
@@ -136,7 +149,7 @@ function placeBet() {
     }
 
     var dateElements = betDateHtml.split('-');
-    var betDate = new Date(Date.UTC(dateElements[0], (dateElements[1]-1), dateElements[2]));
+    var betDate = new Date(Date.UTC(dateElements[0], (dateElements[1] - 1), dateElements[2]));
 
     getAccount(0).then(function(account) {
         var bet = Bet.deployed();
@@ -179,7 +192,7 @@ function payPrize() {
         var bet = Bet.deployed();
         return bet.payout.sendTransaction(account, {
             from: account,
-            gas: "0x186a0"
+            gas: "0x65fb0"
         });
     }).catch(function(e) {
         setStatus(AlertType.ERROR, 'An error occured in the transaction. See log for further information.');
@@ -296,17 +309,26 @@ function startEventWatchers() {
 
     var determinedWinnerEvent = bet.DeterminedWinner();
 
-    determinedWinnerEvent.watch(function (error, result) {
+    determinedWinnerEvent.watch(function(error, result) {
         if (!error) {
             console.log('[Got Winner ] winner: ' + result.args.winner +
-            ', bet: ' + result.args.bet +
-            ', result: ' + result.args.result +
-            ', diff: ' + result.args.difference);
+                ', bet: ' + result.args.bet +
+                ', result: ' + result.args.result +
+                ', diff: ' + result.args.difference);
             setStatus(AlertType.ALERT, 'Determined Winner');
             refreshDashboard();
             updateButtons();
         } else {
             console.error(error);
+        }
+    });
+
+    var errorEvent = bet.Error();
+    errorEvent.watch(function (error, result) {
+        if (!error) {
+            console.error('[Solidity Error] ' + result.args.message);
+        } else {
+            console.error(e);
         }
     });
 }
