@@ -74,18 +74,6 @@ contract Bet is Mortal {
         Creation(msg.sender, price, this.balance, round);
     }
 
-    function closeBetting() {
-
-        // closing the betting period is allowed during State.Open only
-        if (state != State.Open) {
-            throw;
-        }
-
-        state = State.Closed;
-
-        ClosingBetting(msg.sender);
-    }
-
     function placeBet (uint date) {
 
         // bet are allowed during State.Open only
@@ -102,6 +90,18 @@ contract Bet is Mortal {
         bets[msg.sender] = PriceBet(round, date);
 
         PlacedBet(msg.sender, date, round);
+    }
+
+    function closeBetting() {
+
+        // closing the betting period is allowed during State.Open only
+        if (state != State.Open) {
+            throw;
+        }
+
+        state = State.Closed;
+
+        ClosingBetting(msg.sender);
     }
 
     function determineWinner(uint result) returns(address) {
