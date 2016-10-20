@@ -98,10 +98,6 @@ contract Bet is Mortal {
             throw;
         }
 
-        /*if (rounds[msg.sender] == round) {
-            throw;
-        }*/
-
         betters.push(msg.sender);
         bets[msg.sender] = PriceBet(round, date);
 
