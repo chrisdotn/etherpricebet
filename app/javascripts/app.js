@@ -132,7 +132,8 @@ function createBet() {
 
         return bet.create.sendTransaction(dollarValue, {
             value: prizeInWei,
-            from: account
+            from: account,
+            gas: '0xe0000'
         });
     }).catch(function(e) {
         setStatus(AlertType.ERROR, 'An error occured in the transaction. See log for further information.');
@@ -264,7 +265,6 @@ function startEventWatchers() {
             console.log('[Bet created] hash: \'' + result.transactionHash +
                 '\', creator: \'' + result.args.creator +
                 '\', price: ' + result.args.price + '$' +
-                ', round: ' + result.args.round +
                 ', jackpot: ' + web3.fromWei(result.args.jackpot, 'ether') + ' ether.');
             setStatus(AlertType.SUCCESS, 'Tx mined: Bet created.');
             refreshDashboard();
@@ -326,11 +326,22 @@ function startEventWatchers() {
     var errorEvent = bet.Error();
     errorEvent.watch(function (error, result) {
         if (!error) {
-            console.error('[Solidity Error] ' + result.args.message);
+            console.log('[Solidity Error] ' + result.args.message);
+            setStatus(AlertType.WARNING, 'Error in contract, see log.');
         } else {
             console.error(e);
         }
     });
+
+    var noWinnerEvent = bet.NoWinner();
+    noWinnerEvent.watch(function (error, result) {
+        if (!error) {
+            console.log('[No Winner ] ' + result.args.message);
+            setStatus(AlertType.ALERT, 'No winner found.');
+            refreshDashboard();
+            updateButtons();
+        }
+    })
 }
 
 window.onload = function() {

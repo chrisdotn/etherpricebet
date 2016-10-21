@@ -3,24 +3,17 @@ import "./Mortal.sol";
 contract Bet is Mortal {
     enum State { New, Open, Closed, Won }
 
-    struct PriceBet {
-        uint round;
-        uint date;
-    }
-
     State public state;
     uint public pricelevel;
-    uint public round;
     address winner;
 
     address[] betters;
-    mapping (address => PriceBet) public bets;
+    mapping (address => uint) public bets;
 
     event Creation(
         address indexed creator,
         uint indexed price,
-        uint jackpot,
-        uint round
+        uint jackpot
     );
 
     event ClosingBetting(
@@ -29,8 +22,7 @@ contract Bet is Mortal {
 
     event PlacedBet(
         address indexed creator,
-        uint indexed date,
-        uint round
+        uint indexed date
     );
 
     event Payout(
@@ -44,6 +36,10 @@ contract Bet is Mortal {
         uint bet,
         uint result,
         uint difference
+    );
+
+    event NoWinner(
+        string message
     );
 
     event Error(
@@ -69,9 +65,33 @@ contract Bet is Mortal {
         betters.length = 0;
         pricelevel = price;
         state = State.Open;
-        round++;
 
-        Creation(msg.sender, price, this.balance, round);
+        Creation(msg.sender, price, this.balance);
+    }
+
+    function hasBet (address better) constant returns (bool) {
+        for (uint i=0; i<betters.length; i++) {
+            if (better == betters[i]) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    function placeBet (uint date) {
+
+        // bet are allowed during State.Open only
+        if (state != State.Open) {
+            throw;
+        }
+
+        if (!hasBet(msg.sender)) {
+            betters.push(msg.sender);
+        }
+
+        bets[msg.sender] = date;
+
+        PlacedBet(msg.sender, date);
     }
 
     function closeBetting() {
@@ -86,48 +106,38 @@ contract Bet is Mortal {
         ClosingBetting(msg.sender);
     }
 
-    function placeBet (uint date) {
-
-        // bet are allowed during State.Open only
-        if (state != State.Open) {
-            throw;
-        }
-
-        // only one bet allowed, else throw
-        if (bets[msg.sender].round == round) {
-            throw;
-        }
-
-        betters.push(msg.sender);
-        bets[msg.sender] = PriceBet(round, date);
-
-        PlacedBet(msg.sender, date, round);
-    }
-
-    function determineWinner(uint result) returns(address) {
-
+    function determineWinner(uint result) constant returns(bool, address, uint) {
         address currentWinner;
         uint currentDiff = 999999999999;
+        bool foundWinner = false;
 
         for (uint i=0; i<betters.length; i++) {
 
-            uint difference = 0;
+            uint difference = 999999999999;
 
-            PriceBet bet = bets[betters[i]];
+            uint bet = bets[betters[i]];
 
-            if (bet.date > result) {
-                difference = bet.date - result;
+            if (bet > result) {
+                difference = bet - result;
             } else {
-                difference = result - bet.date;
+                difference = result - bet;
             }
 
             if (difference < currentDiff) {
                 currentDiff = difference;
                 currentWinner = betters[i];
+                foundWinner = true;
             }
         }
+        return (foundWinner, currentWinner, currentDiff);
+    }
 
-        return currentWinner;
+    function queryOracle(uint price) constant returns (bool, uint) {
+
+        // 1476655200000 is 2016-10-17
+        // TODO call oracalize here
+        uint result = 1476655200000;
+        return (true, result);
     }
 
     function evaluateBet() returns (bool) {
@@ -137,21 +147,26 @@ contract Bet is Mortal {
             throw;
         }
 
-        // 1476655200000 is 2016-10-17
-        uint result = 1476655200000;
-        winner = determineWinner(result);
+        var (isPriceReached, priceDate) = queryOracle(pricelevel);
 
-        uint difference = 0;
-        if (result > bets[winner].date) {
-            difference = result - bets[winner].date;
-        } else {
-            difference = bets[winner].date - result;
+        if (!isPriceReached) {
+            NoWinner('Price has not been reached yet.');
+            return false;
         }
 
-        DeterminedWinner(winner, bets[winner].date, result, difference);
+        var (foundWinner, winningAddress, difference) = determineWinner(priceDate);
 
+        if (!foundWinner) {
+            winner = owner;
+            state = State.Won;
+            NoWinner('Price has been reached, but there was no bet.');
+            return true;
+        }
+
+        winner = winningAddress;
         state = State.Won;
 
+        DeterminedWinner(winner, bets[winner], priceDate, difference);
         return true;
     }
 
@@ -160,11 +175,6 @@ contract Bet is Mortal {
         // payout is allowed in State.Won only
         if (state != State.Won) {
             Error('State is not WON');
-            throw;
-        }
-
-        if (bets[winner].round != round) {
-            Error('Rounds is not proper');
             throw;
         }
 
