@@ -264,7 +264,6 @@ function startEventWatchers() {
             console.log('[Bet created] hash: \'' + result.transactionHash +
                 '\', creator: \'' + result.args.creator +
                 '\', price: ' + result.args.price + '$' +
-                ', round: ' + result.args.round +
                 ', jackpot: ' + web3.fromWei(result.args.jackpot, 'ether') + ' ether.');
             setStatus(AlertType.SUCCESS, 'Tx mined: Bet created.');
             refreshDashboard();
