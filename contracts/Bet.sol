@@ -46,6 +46,10 @@ contract Bet is Mortal {
         uint difference
     );
 
+    event NoWinner(
+        string message
+    );
+
     event Error(
         string message
     );
@@ -130,6 +134,14 @@ contract Bet is Mortal {
         return (foundWinner, currentWinner, currentDiff);
     }
 
+    function queryOracle(uint price) constant returns (bool, uint) {
+
+        // 1476655200000 is 2016-10-17
+        // TODO call oracalize here
+        uint result = 1476655200000;
+        return (true, result);
+    }
+
     function evaluateBet() returns (bool) {
 
         // determine winner is allowed in State.Closed only
@@ -137,21 +149,26 @@ contract Bet is Mortal {
             throw;
         }
 
-        // 1476655200000 is 2016-10-17
-        // TODO call oracalize here
-        uint result = 1476655200000;
-        var (foundWinner, winningAddress, difference) = determineWinner(result);
+        var (isPriceReached, priceDate) = queryOracle(pricelevel);
+
+        if (!isPriceReached) {
+            NoWinner('Price has not been reached yet.');
+            return false;
+        }
+
+        var (foundWinner, winningAddress, difference) = determineWinner(priceDate);
 
         if (!foundWinner) {
-            // TODO need to refund original creator
-            Error('Found no winner');
-            return false;
+            winner = owner;
+            state = State.Won;
+            NoWinner('Price has been reached, but there was no bet.');
+            return true;
         }
 
         winner = winningAddress;
         state = State.Won;
 
-        DeterminedWinner(winner, bets[winner].date, result, difference);
+        DeterminedWinner(winner, bets[winner].date, priceDate, difference);
         return true;
     }
 
@@ -163,7 +180,9 @@ contract Bet is Mortal {
             throw;
         }
 
-        if (bets[winner].round != round) {
+        // next condition is valid only if there is a proper bet
+        // ie. not refunding to the creator
+        if (winner != owner && bets[winner].round != round) {
             Error('Rounds is not proper');
             throw;
         }

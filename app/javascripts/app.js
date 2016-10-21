@@ -327,10 +327,21 @@ function startEventWatchers() {
     errorEvent.watch(function (error, result) {
         if (!error) {
             console.log('[Solidity Error] ' + result.args.message);
+            setStatus(AlertType.WARNING, 'Error in contract, see log.');
         } else {
             console.error(e);
         }
     });
+
+    var noWinnerEvent = bet.NoWinner();
+    noWinnerEvent.watch(function (error, result) {
+        if (!error) {
+            console.log('[No Winner ] ' + result.args.message);
+            setStatus(AlertType.ALERT, 'No winner found.');
+            refreshDashboard();
+            updateButtons();
+        }
+    })
 }
 
 window.onload = function() {
