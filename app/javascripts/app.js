@@ -132,7 +132,8 @@ function createBet() {
 
         return bet.create.sendTransaction(dollarValue, {
             value: prizeInWei,
-            from: account
+            from: account,
+            gas: '0xe0000'
         });
     }).catch(function(e) {
         setStatus(AlertType.ERROR, 'An error occured in the transaction. See log for further information.');
