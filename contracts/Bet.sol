@@ -132,23 +132,41 @@ contract Bet is Mortal {
         return (foundWinner, currentWinner, currentDiff);
     }
 
-    function queryOracle(uint price) constant returns (bool, uint) {
+    function queryOracle(uint price) constant {
 
         // 1476655200000 is 2016-10-17
-        // TODO call oracalize here
-        uint result = 1476655200000;
-        return (true, result);
+        // TODO inherit contract and override to actually call oraclize
+        string memory result = '1476655200000';
+        __callback(1, result);
     }
 
-    function evaluateBet() returns (bool) {
+    // Copyright (c) 2015-2016 Oraclize srl, Thomas Bertani
+    function parseInt(string _a, uint _b) internal returns (uint) {
+      bytes memory bresult = bytes(_a);
+      uint mint = 0;
+      bool decimals = false;
+      for (uint i = 0; i < bresult.length; i++) {
+        if ((bresult[i] >= 48) && (bresult[i] <= 57)) {
+          if (decimals) {
+            if (_b == 0) break;
+              else _b--;
+          }
+          mint *= 10;
+          mint += uint(bresult[i]) - 48;
+        } else if (bresult[i] == 46) decimals = true;
+      }
+      return mint;
+    }
 
-        // determine winner is allowed in State.Closed only
-        if (state != State.Closed) {
-            throw;
-        }
+    // Callback to be called by once the oracle Query has been resolved
+    function __callback(bytes32 myid, string result) {
+        // FIXME string cannot use != for comparison with literal string ''
+        bool isPriceReached = result != '' ? true : false;
 
-        var (isPriceReached, priceDate) = queryOracle(pricelevel);
+        evaluateAfterQuery(isPriceReached, parseInt(result, 0));
+    }
 
+    function evaluateAfterQuery(bool isPriceReached, uint priceDate) returns (bool) {
         if (!isPriceReached) {
             NoWinner('Price has not been reached yet.');
             return false;
@@ -168,6 +186,18 @@ contract Bet is Mortal {
 
         DeterminedWinner(winner, bets[winner], priceDate, difference);
         return true;
+    }
+
+    function evaluateBet() returns (bool) {
+
+        // determine winner is allowed in State.Closed only
+        if (state != State.Closed) {
+            throw;
+        }
+
+        var (isPriceReached, priceDate) = queryOracle(pricelevel);
+
+
     }
 
     function payout() returns (bool) {
