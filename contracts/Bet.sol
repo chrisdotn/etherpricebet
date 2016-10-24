@@ -52,10 +52,10 @@ contract Bet is Mortal {
         state = State.New;
     }
 
-    function create(uint price) {
+    function create(uint price) payable {
 
         // new bets are only allowed in state State.New
-        /*if (state != State.New) {
+        if (state != State.New) {
             throw;
         }
 
@@ -64,7 +64,7 @@ contract Bet is Mortal {
         pricelevel = price;
         state = State.Open;
 
-        Creation(msg.sender, price, this.balance);*/
+        Creation(msg.sender, price, this.balance);
     }
 
     function hasBet (address better) constant returns (bool) {
