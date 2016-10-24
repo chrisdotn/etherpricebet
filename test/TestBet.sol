@@ -13,4 +13,11 @@ contract TestBet {
         Assert.equal(betAddress.balance, expected, "Bet should have 0 ether initially");
     }
 
+    function testInitalBalanceUsingNewContract() {
+        uint expected = 0;
+        Bet bet = new Bet();
+
+        Assert.equal(bet.balance, expected, "Bet should have 0 ether initially");
+    }
+
 }
