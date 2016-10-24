@@ -1,3 +1,5 @@
+pragma solidity ^0.4.2;
+
 import "./Mortal.sol";
 
 contract Bet is Mortal {
@@ -50,14 +52,10 @@ contract Bet is Mortal {
         state = State.New;
     }
 
-    function getBalance() constant returns (uint balance) {
-        return this.balance;
-    }
-
     function create(uint price) {
 
         // new bets are only allowed in state State.New
-        if (state != State.New) {
+        /*if (state != State.New) {
             throw;
         }
 
@@ -66,7 +64,7 @@ contract Bet is Mortal {
         pricelevel = price;
         state = State.Open;
 
-        Creation(msg.sender, price, this.balance);
+        Creation(msg.sender, price, this.balance);*/
     }
 
     function hasBet (address better) constant returns (bool) {
@@ -158,10 +156,17 @@ contract Bet is Mortal {
       return mint;
     }
 
+    function isEmpty(string value) internal returns (bool) {
+        if (bytes(value).length == 0) {
+            return true;
+        }
+        return false;
+    }
+
     // Callback to be called by once the oracle Query has been resolved
     function __callback(bytes32 myid, string result) {
         // FIXME string cannot use != for comparison with literal string ''
-        bool isPriceReached = result != '' ? true : false;
+        bool isPriceReached = !isEmpty(result);
 
         evaluateAfterQuery(isPriceReached, parseInt(result, 0));
     }
@@ -195,9 +200,7 @@ contract Bet is Mortal {
             throw;
         }
 
-        var (isPriceReached, priceDate) = queryOracle(pricelevel);
-
-
+        queryOracle(pricelevel);
     }
 
     function payout() returns (bool) {
