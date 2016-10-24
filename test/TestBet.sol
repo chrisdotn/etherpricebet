@@ -5,10 +5,12 @@ import "truffle/DeployedAddresses.sol";
 import "../contracts/Bet.sol";
 
 contract TestBet {
+
     function testInitalBalanceUsingDeployedContract() {
         uint expected = 0;
-        uint balance = DeployedAddresses.Bet().balance;
+        address betAddress = DeployedAddresses.Bet();
 
-        Assert.equal(balance, expected, "Bet should have 0 ether initially");
+        Assert.equal(betAddress.balance, expected, "Bet should have 0 ether initially");
     }
+
 }
