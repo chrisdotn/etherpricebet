@@ -7,7 +7,6 @@ import "../contracts/Bet.sol";
 contract TestBet_Create {
 
     Bet bet;
-    //uint weiValue = 10000000000000000000;
     uint weiValue = 0;
     uint priceLevel = 12;
 
@@ -15,7 +14,6 @@ contract TestBet_Create {
         bet = new Bet();
 
         bet.create.value(weiValue)(priceLevel);
-        //bet.create(priceLevel);
     }
 
     function testCreatePricelevelUsingNewContract() {
@@ -23,7 +21,7 @@ contract TestBet_Create {
     }
 
     function testCreatePrizeUsingNewContract() {
-        Assert.equal(bet.balance, weiValue, 'Bet should have 10000000000000000000 wei now');
+        Assert.balanceIsZero(bet, 'Bet should have 10000000000000000000 wei now');
     }
 
 }

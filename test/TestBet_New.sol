@@ -8,13 +8,11 @@ contract TestBet_New {
 
     function testInitalBalanceUsingDeployedContract() {
         Bet bet = Bet(DeployedAddresses.Bet());
-
         Assert.balanceIsZero(bet, "Bet should have 0 ether initially");
     }
 
     function testInitalBalanceUsingNewContract() {
         Bet bet = new Bet();
-
         Assert.balanceIsZero(bet, "Bet should have 0 ether initially");
     }
 
