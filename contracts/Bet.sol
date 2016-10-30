@@ -7,7 +7,7 @@ contract Bet is Mortal {
 
     State public state;
     uint public pricelevel;
-    address winner;
+    address public winner;
 
     address[] betters;
     mapping (address => uint) public bets;
@@ -134,8 +134,12 @@ contract Bet is Mortal {
 
         // 1476655200000 is 2016-10-17
         // TODO inherit contract and override to actually call oraclize
-        string memory result = '1476655200000';
-        __callback(1, result);
+        //string memory result = '1476655200000';
+        //string memory result = '1476655200';
+        //string memory result = '[1475366400, 1475452800, 1475539200, 1475625600, 1475712000]';
+        //__callback(1, result);
+
+        //TODO call oracle
     }
 
     // Copyright (c) 2015-2016 Oraclize srl, Thomas Bertani
@@ -164,8 +168,7 @@ contract Bet is Mortal {
     }
 
     // Callback to be called by once the oracle Query has been resolved
-    function __callback(bytes32 myid, string result) {
-        // FIXME string cannot use != for comparison with literal string ''
+    function __callback(bytes32 myid, string result) public {
         bool isPriceReached = !isEmpty(result);
 
         evaluateAfterQuery(isPriceReached, parseInt(result, 0));
@@ -193,7 +196,7 @@ contract Bet is Mortal {
         return true;
     }
 
-    function evaluateBet() returns (bool) {
+    function evaluateBet() {
 
         // determine winner is allowed in State.Closed only
         if (state != State.Closed) {

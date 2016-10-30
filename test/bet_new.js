@@ -1,9 +1,9 @@
-contract('Bet', function(accounts) {
+contract('Bet after new()', function(accounts) {
     var StatusEnum = {
         NEW: 0,
         OPEN: 1,
         CLOSED: 2,
-        ENDED: 3
+        WON: 3
     };
 
     it('should be in status \'NEW\'', function(done) {
@@ -18,15 +18,12 @@ contract('Bet', function(accounts) {
         var bet = Bet.deployed();
 
         new Promise(function(resolve, reject) {
-            web3.eth.getBalance(bet.address, function (error, balance) {
-                if (!error) {
-                    resolve(balance);
-                } else {
-                    reject(error);
-                }
+            web3.eth.getBalance(bet.address, function(error, balance) {
+                (!error) ? resolve(balance): reject(error);
             });
         }).then(function(value) {
             assert.equal(parseInt(value), 0, 'Value is ≠ 0');
         }).then(done).catch(done);
     });
+
 });
