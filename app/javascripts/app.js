@@ -156,7 +156,7 @@ function refreshDashboard() {
 
         getAccount(0).then(function(account) {
             var bet = Bet.deployed();
-            return bet.placeBet.sendTransaction(betDate.getTime(), {
+            return bet.placeBet.sendTransaction(betDate.getTime() / 1000, {
                 from: account
             });
         }).catch(function(e) {
@@ -280,7 +280,7 @@ function refreshDashboard() {
 
         placedBetEvent.watch(function(error, result) {
             if (!error) {
-                var betDate = new Date(parseInt(result.args.date)).toISOString().slice(0, 10);
+                var betDate = new Date(parseInt(result.args.date) * 1000).toISOString().slice(0, 10);
 
                 console.log('[Bet placed ] hash: \'' + result.transactionHash +
                     '\', creator: \'' + result.args.creator +
