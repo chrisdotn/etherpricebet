@@ -131,17 +131,19 @@ contract Bet is Mortal {
     }
 
     function queryOracle(uint price) constant {
-
-        // 1476655200000 is 2016-10-17
-        // TODO inherit contract and override to actually call oraclize
-        //string memory result = '1476655200000';
-        //string memory result = '1476655200';
-        //string memory result = '[1475366400, 1475452800, 1475539200, 1475625600, 1475712000]';
-        //__callback(1, result);
-
         //TODO call oracle
     }
 
+    function evaluateBet() {
+
+        // determine winner is allowed in State.Closed only
+        if (state != State.Closed) {
+            throw;
+        }
+
+        queryOracle(pricelevel);
+    }
+    
     // Copyright (c) 2015-2016 Oraclize srl, Thomas Bertani
     function parseInt(string _a, uint _b) internal returns (uint) {
       bytes memory bresult = bytes(_a);
@@ -167,12 +169,6 @@ contract Bet is Mortal {
         return false;
     }
 
-    // Callback to be called by once the oracle Query has been resolved
-    function __callback(bytes32 myid, string result) public {
-        bool isPriceReached = !isEmpty(result);
-
-        evaluateAfterQuery(isPriceReached, parseInt(result, 0));
-    }
 
     function evaluateAfterQuery(bool isPriceReached, uint priceDate) returns (bool) {
         if (!isPriceReached) {
@@ -196,14 +192,11 @@ contract Bet is Mortal {
         return true;
     }
 
-    function evaluateBet() {
+    // Callback to be called by once the oracle Query has been resolved
+    function __callback(bytes32 myid, string result) public {
+        bool isPriceReached = !isEmpty(result);
 
-        // determine winner is allowed in State.Closed only
-        if (state != State.Closed) {
-            throw;
-        }
-
-        queryOracle(pricelevel);
+        evaluateAfterQuery(isPriceReached, parseInt(result, 0));
     }
 
     function payout() returns (bool) {
