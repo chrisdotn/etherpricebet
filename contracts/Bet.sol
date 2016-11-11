@@ -40,13 +40,10 @@ contract Bet is Mortal {
         uint difference
     );
 
-    event NoWinner(
-        string message
-    );
+    event NoWinner( string message);
 
-    event Error(
-        string message
-    );
+    event Error( string message);
+    event Info( string message );
 
     function Bet() {
         state = State.New;
@@ -159,6 +156,7 @@ contract Bet is Mortal {
 
     function queryOracle(uint price) constant {
         //TODO call oracle
+        Info("called Bet.queryOracle");
     }
 
     function evaluateBet() {

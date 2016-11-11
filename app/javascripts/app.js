@@ -31,8 +31,12 @@ function updateHtmlValue(id, value) {
     htmlElement.innerHTML = value;
 }
 
+function getBet() {
+    return OraclizeBet.deployed();
+}
+
 function refreshDashboard() {
-    var bet = Bet.deployed();
+    var bet = getBet();
 
     web3.eth.getBalance(bet.address, function(error, balance) {
             if (!error) {
@@ -77,7 +81,7 @@ function refreshDashboard() {
     }
 
     function updateButtons() {
-        var bet = Bet.deployed();
+        var bet = getBet();
         bet.state().then(function(state) {
             switch (parseInt(state)) {
                 case StatusEnum.NEW:
@@ -130,7 +134,7 @@ function refreshDashboard() {
         var prizeInWei = web3.toWei(prizeAmount, 'ether');
 
         getAccount(0).then(function(account) {
-            var bet = Bet.deployed();
+            var bet = getBet();
 
             return bet.create.sendTransaction(dollarValue, {
                 value: prizeInWei,
@@ -155,7 +159,7 @@ function refreshDashboard() {
         var betDate = new Date(Date.UTC(dateElements[0], (dateElements[1] - 1), dateElements[2]));
 
         getAccount(0).then(function(account) {
-            var bet = Bet.deployed();
+            var bet = getBet();
             return bet.placeBet.sendTransaction(betDate.getTime() / 1000, {
                 from: account
             });
@@ -167,7 +171,7 @@ function refreshDashboard() {
 
     function closeBetting() {
         getAccount(0).then(function(account) {
-            var bet = Bet.deployed();
+            var bet = getBet();
 
             return bet.closeBetting.sendTransaction({
                 from: account
@@ -180,7 +184,7 @@ function refreshDashboard() {
 
     function evaluateBet() {
         getAccount(0).then(function(account) {
-            var bet = Bet.deployed();
+            var bet = getBet();
             return bet.evaluateBet.sendTransaction({
                 from: account,
             });
@@ -192,7 +196,7 @@ function refreshDashboard() {
 
     function payPrize() {
         getAccount(0).then(function(account) {
-            var bet = Bet.deployed();
+            var bet = getBet();
             return bet.payout.sendTransaction(account, {
                 from: account,
                 gas: "0x65fb0"
@@ -243,7 +247,7 @@ function refreshDashboard() {
 
     function startEventWatchers() {
 
-        var bet = Bet.deployed();
+        var bet = getBet();
 
         var closingBettingEvent = bet.ClosingBetting();
 
@@ -325,11 +329,21 @@ function refreshDashboard() {
             }
         });
 
+        var infoEvent = bet.Info();
+        infoEvent.watch(function(error, result) {
+            if (!error) {
+                console.log('[Solidity Info] ' + result.args.message);
+                setStatus(AlertType.ALERT, 'Info from contract, see log.');
+            } else {
+                console.error(e);
+            }
+        });
+
         var errorEvent = bet.Error();
         errorEvent.watch(function(error, result) {
             if (!error) {
-                console.log('[Solidity Error] ' + result.args.message);
-                setStatus(AlertType.WARNING, 'Error in contract, see log.');
+                console.error('[Solidity Error] ' + result.args.message);
+                setStatus(AlertType.WARNING, 'Error from contract, see log.');
             } else {
                 console.error(e);
             }
