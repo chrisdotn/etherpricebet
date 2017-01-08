@@ -7,6 +7,7 @@ contract Bet is Mortal {
 
     State public state;
     uint public pricelevel;
+    string pricelevel_string;
     address public winner;
 
     address[] betters;
@@ -76,7 +77,7 @@ contract Bet is Mortal {
         return false;
     }
 
-    function create(uint price) payable {
+    function create(string price) payable {
 
         // new bets are only allowed in state State.New
         if (state != State.New) {
@@ -85,13 +86,14 @@ contract Bet is Mortal {
 
         winner = 0;
         betters.length = 0;
-        pricelevel = price;
+        pricelevel_string = price;
+        pricelevel = parseInt(price, 0);
         state = State.Open;
 
-        Creation(msg.sender, price, this.balance);
+        Creation(msg.sender, pricelevel, this.balance);
     }
 
-    function hasBet (address better) constant returns (bool) {
+    function hasBet (address better) constant returns (bool) {      
         for (uint i=0; i<betters.length; i++) {
             if (better == betters[i]) {
                 return true;
@@ -154,7 +156,7 @@ contract Bet is Mortal {
         return (foundWinner, currentWinner, currentDiff);
     }
 
-    function queryOracle(uint price) constant {
+    function queryOracle(string price) constant {
         //TODO call oracle
         Info("called Bet.queryOracle");
     }
@@ -166,7 +168,7 @@ contract Bet is Mortal {
             throw;
         }
 
-        queryOracle(pricelevel);
+        queryOracle(pricelevel_string);
     }
 
     function evaluateAfterQuery(bool isPriceReached, uint priceDate) returns (bool) {

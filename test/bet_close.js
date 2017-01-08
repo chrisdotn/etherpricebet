@@ -6,7 +6,7 @@ contract('Bet after closeBetting()', function(accounts) {
         WON: 3
     };
 
-    var priceLevel = 100;
+    var priceLevel = '100';
     var weiValue = web3.toWei(10, 'ether');
     var betDate1 = 1476655200000;
     var betDate2 = 1876655200000;

@@ -6,7 +6,7 @@ contract('Bet after create()', function(accounts) {
         WON: 3
     };
 
-    var priceLevel = 100;
+    var priceLevel = '100';
     var weiValue = web3.toWei(10, 'ether');
 
     it('should be able to create a new bet', function(done) {
@@ -29,7 +29,7 @@ contract('Bet after create()', function(accounts) {
     it('should have price level 100', function(done) {
         var bet = Bet.deployed();
         bet.pricelevel().then(function(betPriceLevel) {
-            assert.equal(parseInt(betPriceLevel), priceLevel, 'Pricelevel is not correct');
+            assert.equal(parseInt(betPriceLevel), parseInt(priceLevel), 'Pricelevel is not correct');
         }).then(done).catch(done);
     });
 

@@ -136,7 +136,7 @@ function refreshDashboard() {
         getAccount(0).then(function(account) {
             var bet = getBet();
 
-            return bet.create.sendTransaction(dollarValue, {
+            return bet.create.sendTransaction(dollarValue.toString(), {
                 value: prizeInWei,
                 from: account,
                 gas: '0xe0000'

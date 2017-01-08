@@ -6,7 +6,7 @@ contract('Bet after placeBet()', function(accounts) {
         WON: 3
     };
 
-    var priceLevel = 100;
+    var priceLevel = '100';
     var weiValue = web3.toWei(10, 'ether');
     var betDate1 = new Date(Date.UTC(2016, 9, 17));
     var betDate2 = new Date(Date.UTC(2016, 9, 20));
