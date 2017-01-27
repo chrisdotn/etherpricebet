@@ -9,7 +9,7 @@ contract OraclizeBet is Bet, usingOraclize {
     event Info(string message);
 
     function OraclizeBet() {
-        OAR = OraclizeAddrResolverI(0x87969a1f75cdd02744a32a9cc363f9acb1129873);
+        OAR = OraclizeAddrResolverI(0xf90f0e95afbeb09ba392907946031b73265db5cc);
     }
 
     function evaluateBet() {
@@ -22,13 +22,20 @@ contract OraclizeBet is Bet, usingOraclize {
         queryOracle(pricelevel_string, '1477440000');
     }
 
+    function q_test(string query) {
+        oraclize_query('URL', query, '{ "pair": "ETHUSD", "interval":1440, "since":1477440000}');
+    }
+
     function queryOracle(string price, string startdate) {
 
         Info('Called OraclizeBet.queryOracle()');
 
-        string memory apiCall = strConcat('json(https://api.kraken.com/0/public/OHLC).result.XETHZUSD[?(@[2]>',
+        /*string memory apiCall = strConcat('json(https://api.kraken.com/0/public/OHLC).result.XETHZUSD[?(@[2]>',
             price,
-            ')][0]');
+            ')][0]');*/
+
+        string memory apiCall = 'json(https://api.kraken.com/0/public/OHLC).result';
+
         string memory postData = strConcat('{ "pair": "ETHUSD", "interval": 1440, "since":',
             startdate,
             ' }');
