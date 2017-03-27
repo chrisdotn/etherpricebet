@@ -1,7 +1,7 @@
 pragma solidity ^0.4.0;
 
 import './Bet.sol';
-import './lib/usingOraclize.sol';
+import 'oraclize/usingOraclize.sol';
 import './lib/StringLib.sol';
 
 contract OraclizeBet is Bet, usingOraclize {
