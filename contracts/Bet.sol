@@ -1,3 +1,5 @@
+pragma solidity ^0.4.2;
+
 import "./Mortal.sol";
 
 contract Bet is Mortal {
@@ -5,7 +7,8 @@ contract Bet is Mortal {
 
     State public state;
     uint public pricelevel;
-    address winner;
+    string pricelevel_string;
+    address public winner;
 
     address[] betters;
     mapping (address => uint) public bets;
@@ -38,23 +41,43 @@ contract Bet is Mortal {
         uint difference
     );
 
-    event NoWinner(
-        string message
-    );
+    event NoWinner( string message);
 
-    event Error(
-        string message
-    );
+    event Error( string message);
+    event Info( string message );
 
     function Bet() {
         state = State.New;
     }
 
-    function getBalance() constant returns (uint balance) {
-        return this.balance;
+    /* interal helper functions */
+
+    // Copyright (c) 2015-2016 Oraclize srl, Thomas Bertani
+    function parseInt(string _a, uint _b) internal returns (uint) {
+        bytes memory bresult = bytes(_a);
+        uint mint = 0;
+        bool decimals = false;
+        for (uint i = 0; i < bresult.length; i++) {
+            if ((bresult[i] >= 48) && (bresult[i] <= 57)) {
+                if (decimals) {
+                    if (_b == 0) break;
+                    else _b--;
+                }
+                mint *= 10;
+                mint += uint(bresult[i]) - 48;
+                } else if (bresult[i] == 46) decimals = true;
+            }
+            return mint;
+        }
+
+    function isEmpty(string value) internal returns (bool) {
+        if (bytes(value).length == 0) {
+            return true;
+        }
+        return false;
     }
 
-    function create(uint price) {
+    function create(string price) payable {
 
         // new bets are only allowed in state State.New
         if (state != State.New) {
@@ -63,13 +86,14 @@ contract Bet is Mortal {
 
         winner = 0;
         betters.length = 0;
-        pricelevel = price;
+        pricelevel_string = price;
+        pricelevel = parseInt(price, 0);
         state = State.Open;
 
-        Creation(msg.sender, price, this.balance);
+        Creation(msg.sender, pricelevel, this.balance);
     }
 
-    function hasBet (address better) constant returns (bool) {
+    function hasBet (address better) constant returns (bool) {      
         for (uint i=0; i<betters.length; i++) {
             if (better == betters[i]) {
                 return true;
@@ -132,23 +156,22 @@ contract Bet is Mortal {
         return (foundWinner, currentWinner, currentDiff);
     }
 
-    function queryOracle(uint price) constant returns (bool, uint) {
-
-        // 1476655200000 is 2016-10-17
-        // TODO call oracalize here
-        uint result = 1476655200000;
-        return (true, result);
+    function queryOracle(string price) constant {
+        //TODO call oracle
+        Info("called Bet.queryOracle");
     }
 
-    function evaluateBet() returns (bool) {
+    function evaluateBet() {
 
         // determine winner is allowed in State.Closed only
         if (state != State.Closed) {
             throw;
         }
 
-        var (isPriceReached, priceDate) = queryOracle(pricelevel);
+        queryOracle(pricelevel_string);
+    }
 
+    function evaluateAfterQuery(bool isPriceReached, uint priceDate) returns (bool) {
         if (!isPriceReached) {
             NoWinner('Price has not been reached yet.');
             return false;
@@ -168,6 +191,13 @@ contract Bet is Mortal {
 
         DeterminedWinner(winner, bets[winner], priceDate, difference);
         return true;
+    }
+
+    // Callback to be called by once the oracle Query has been resolved
+    function __callback(bytes32 myid, string result) public {
+        bool isPriceReached = !isEmpty(result);
+
+        evaluateAfterQuery(isPriceReached, parseInt(result, 0));
     }
 
     function payout() returns (bool) {
