@@ -6,8 +6,6 @@ import './lib/StringLib.sol';
 
 contract OraclizeBet is Bet, usingOraclize {
 
-    event Info(string message);
-
     function OraclizeBet() {
         OAR = OraclizeAddrResolverI(0xf90f0e95afbeb09ba392907946031b73265db5cc);
     }
